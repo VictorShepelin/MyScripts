@@ -47,9 +47,9 @@ $Girls = "Girls"
 $WishList = "Celebrity", "Drive", "Graphics", "Nature", "Others", "Space", "Enclosure"
 $BlackList = "Camera Roll", "LifeCam Files", "Some", "Twonky", "С проигрывателя Victor", "С телефона Windows Phone Lena", "From Victor", "Raptr Screenshots", "toSort", "Из Submarine", "Файлы LifeCam", "Saved Pictures", "Instagram", "Private", "Screenshots", "Пленка"
 # check if files exist and setting folders list
-if (Get-Item "D:\OneDrive\My Scripts\Wallpapers\addnude.flag") {
+if (Get-Item "D:\OneDrive\Git\addnude.flag") {
     $ExcludeList = $BlackList
-    if (Get-Item "D:\OneDrive\My Scripts\Wallpapers\girlsonly.flag") {
+    if (Get-Item "D:\OneDrive\Git\girlsonly.flag") {
         $ExcludeList = $BlackList + $WishList
         }
     }
