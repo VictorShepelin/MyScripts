@@ -43,7 +43,6 @@ namespace Wallpaper {
 "@ -Passthru
 $Pictures = "D:\OneDrive\Pictures"
 $WishList = "Celebrity", "Drive", "Graphics", "Nature", "Others", "Space", "Enclosure"
-$file = (Get-ChildItem $Pictures -Exclude $ExcludeList).GetFiles() | Get-Random
 $file = (Get-ChildItem $Pictures | Where-Object {
     if (Test-Path "D:\OneDrive\My Scripts\addnude.flag") {
         $WishList += "Girls"
