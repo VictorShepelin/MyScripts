@@ -1,5 +1,4 @@
 ﻿# Wallpaper Changer version 1.0 - release date: 12.02.2017
-
 $WallpaperType = add-type @"
 using System;
 using System.Runtime.InteropServices;
@@ -43,22 +42,18 @@ namespace Wallpaper {
 }
 "@ -Passthru
 $Pictures = "D:\OneDrive\Pictures"
-$Girls = "Girls"
 $WishList = "Celebrity", "Drive", "Graphics", "Nature", "Others", "Space", "Enclosure"
-$BlackList = "Camera Roll", "LifeCam Files", "Some", "Twonky", "С проигрывателя Victor", "С телефона Windows Phone Lena", "From Victor", "Raptr Screenshots", "toSort", "Из Submarine", "Файлы LifeCam", "Saved Pictures", "Instagram", "Private", "Screenshots", "Пленка"
-# check if files exist and setting folders list
-if (Get-Item "D:\OneDrive\Git\addnude.flag") {
-    $ExcludeList = $BlackList
-    if (Get-Item "D:\OneDrive\Git\girlsonly.flag") {
-        $ExcludeList = $BlackList + $WishList
-    }
-}
-else {
-    $ExcludeList = $BlackList + $Girls
-}
 $file = (Get-ChildItem $Pictures -Exclude $ExcludeList).GetFiles() | Get-Random
+$file = (Get-ChildItem $Pictures | Where-Object {
+    if (Test-Path "D:\OneDrive\My Scripts\addnude.flag") {
+        $WishList += "Girls"
+    }
+    if (Test-Path "D:\OneDrive\My Scripts\girlsonly.flag") {
+        $WishList = "Girls"
+    }
+    $WishList -contains $_.BaseName
+}).GetFiles() | Get-Random
 [Wallpaper.Setter]::SetWallpaper($file.FullName, "Fit")
-
 <# History
  based on http://poshcode.org/2603
  version 1.0 - release date: 12.02.2017
