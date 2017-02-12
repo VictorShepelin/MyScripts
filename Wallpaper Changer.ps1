@@ -51,17 +51,17 @@ if (Get-Item "D:\OneDrive\Git\addnude.flag") {
     $ExcludeList = $BlackList
     if (Get-Item "D:\OneDrive\Git\girlsonly.flag") {
         $ExcludeList = $BlackList + $WishList
-        }
     }
+}
 else {
     $ExcludeList = $BlackList + $Girls
-    }
+}
 $file = (Get-ChildItem $Pictures -Exclude $ExcludeList).GetFiles() | Get-Random
 [Wallpaper.Setter]::SetWallpaper($file.FullName, "Fit")
 
 <# History
  based on http://poshcode.org/2603
- version 1.0 - release date: 11.02.2017
+ version 1.0 - release date: 12.02.2017
     add - first release
  Email for support to Victor.V.Shepelin@live.ru
  #>
