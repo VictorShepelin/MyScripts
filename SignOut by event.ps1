@@ -17,7 +17,7 @@ the force parameter.
 ./Start-Logout -Program “calc.exe” -Timeout 90 
 .Example 
 ./Start-Logout -Program “notepad.exe” -Timeout 15 -force 
-#> 
+#>
 [CmdletBinding(SupportsShouldProcess=$false,ConfirmImpact=”low”)] 
 Param( 
 [Parameter(Mandatory=$False, ValueFromPipelinebyPropertyName=$True)] 
@@ -73,7 +73,7 @@ $notification.ShowBalloonTip(150000)
 # sleep until either the balloon tip is clicked or 1 second elapses. 
 Wait-Event -Timeout 1 -SourceIdentifier notification_event_close | out-null 
 Remove-Event notification_event_close -ErrorAction SilentlyContinue 
-$Timeout– 
+$Timeout
 } 
 Remove-Event notification_event_close -ErrorAction SilentlyContinue 
 Unregister-Event notification_event_close 
@@ -83,9 +83,7 @@ $notification.Dispose()
 # There is no advantage to this over using WMI/Shutdown.exe… 
 # Just wanted to highlight the trick, and show off add-type’s power. 
 Function Exit-UserSession([switch]$Force) { 
-$Win32ExitWindowsEx = Add-Type -Name ‘Win32ExitWindowsEx’ ` 
--namespace ‘Win32Functions’ ` 
--memberDefinition @” 
+$Win32ExitWindowsEx = Add-Type -Name ‘Win32ExitWindowsEx’ -namespace ‘Win32Functions’ -memberDefinition @”
 [DllImport(“user32.dll”)] 
 public static extern int ExitWindowsEx(int uFlags, int dwReason); 
 “@ -passThru 
