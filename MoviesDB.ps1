@@ -1,6 +1,6 @@
 $strPath = "D:\OneDrive\Desktop\MoviesDB.xlsx"
 $Folder = "C:\Videos"
-$items = Get-ChildItem -Recurse -Path $Folder
+$items = Get-ChildItem -Recurse -Path $Folder -include *.avi,*.mp4,*.mkv,*.m4v
 [System.Threading.Thread]::CurrentThread.CurrentCulture = New-Object "System.Globalization.CultureInfo" "en-US"
 $excel = New-Object -ComObject Excel.Application
 $excel.Visible = $true
