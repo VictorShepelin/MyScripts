@@ -3,89 +3,29 @@ $File = "Krik.2.1997.DUAL.BDRip.XviD.AC3.-HQCLUB.avi"
 $objShell = New-Object -ComObject Shell.Application 
 $objFolder = $objShell.NameSpace($Folder)
 $objFile = $objFolder.ParseName($File)
-$key = $objFolder.GetDetailsOf($objFile.items, 16)
-$value = $objFolder.GetDetailsOf($objFile, 16)
-Write-Host $key ":" $value
+for ($i = 0; $i -le 400; $i++) {
+    if (($objFolder.GetDetailsOf($objFile, $i)) -ne "") {
+    $key = $objFolder.GetDetailsOf($objFile.items, $i)
+    $value = $objFolder.GetDetailsOf($objFile, $i)
+    Write-Host $i "-" $key ":" $value        
+    }
+}
+[System.Reflection.Assembly]::LoadFile("F:\Downloads\taglib-sharp.dll") #https://www.nuget.org/packages/taglib/2.1.0
+$mediafile = [TagLib.File]::Create("C:\Videos\Horror\Krik.2.1997.DUAL.BDRip.XviD.AC3.-HQCLUB.avi")
+$mediafile.Writeable
+#$mediafile.Tag
+$mediafile.Tag.AlbumArtists = "Neve Campbell, Courteney Cox, David Arquette" # в ролях 13ый таг
+$mediafile.Tag.Year = "1997" # год выхода 15ый таг
+$mediafile.Tag.Genres = "Horror, Mystery" # жанр 16ый таг
+#$mediafile.Tag.Rating = "6" # рейтинг 19ый таг
+$mediafile.Tag.Title = "Scream 2" # название 21ый таг
+$mediafile.Tag.Comment = "" # коммент 24ый таг
+$mediafile.Tag.copyright = "http://www.imdb.com/title/tt0120082/" # ссылка на imdb 25ый таг
+$mediafile.Save()
 
-# ----------------------------------------------------------------------------- 
-# Script: Get-FileMetaDataReturnObject.ps1 
-# Author: ed wilson, msft 
-# Date: 01/24/2014 12:30:18 
-# Keywords: Metadata, Storage, Files 
-# comments: Uses the Shell.APplication object to get file metadata 
-# Gets all the metadata and returns a custom PSObject 
-# it is a bit slow right now, because I need to check all 266 fields 
-# for each file, and then create a custom object and emit it. 
-# If used, use a variable to store the returned objects before attempting 
-# to do any sorting, filtering, and formatting of the output. 
-# To do a recursive lookup of all metadata on all files, use this type 
-# of syntax to call the function: 
-# Get-FileMetaData -folder (gci e:\music -Recurse -Directory).FullName 
-# note: this MUST point to a folder, and not to a file. 
-# ----------------------------------------------------------------------------- 
-Function Get-FileMetaData 
-{ 
-  <# 
-   .Synopsis 
-    This function gets file metadata and returns it as a custom PS Object  
-   .Description 
-    This function gets file metadata using the Shell.Application object and 
-    returns a custom PSObject object that can be sorted, filtered or otherwise 
-    manipulated. 
-   .Example 
-    Get-FileMetaData -folder "e:\music" 
-    Gets file metadata for all files in the e:\music directory 
-   .Example 
-    Get-FileMetaData -folder (gci e:\music -Recurse -Directory).FullName 
-    This example uses the Get-ChildItem cmdlet to do a recursive lookup of  
-    all directories in the e:\music folder and then it goes through and gets 
-    all of the file metada for all the files in the directories and in the  
-    subdirectories.   
-   .Example 
-    Get-FileMetaData -folder "c:\fso","E:\music\Big Boi" 
-    Gets file metadata from files in both the c:\fso directory and the 
-    e:\music\big boi directory. 
-   .Example 
-    $meta = Get-FileMetaData -folder "E:\music" 
-    This example gets file metadata from all files in the root of the 
-    e:\music directory and stores the returned custom objects in a $meta  
-    variable for later processing and manipulation. 
-   .Parameter Folder 
-    The folder that is parsed for files  
-   .Notes 
-    NAME:  Get-FileMetaData 
-    AUTHOR: ed wilson, msft 
-    LASTEDIT: 01/24/2014 14:08:24 
-    KEYWORDS: Storage, Files, Metadata 
-    HSG: HSG-2-5-14 
-   .Link 
-     Http://www.ScriptingGuys.com 
- #Requires -Version 2.0 
- #> 
- Param([string[]]$folder) 
- foreach($sFolder in $folder) 
-  { 
-   $a = 0 
-   $objShell = New-Object -ComObject Shell.Application 
-   $objFolder = $objShell.namespace($sFolder) 
- 
-   foreach ($File in $objFolder.items()) 
-    {  
-     $FileMetaData = New-Object PSOBJECT 
-      for ($a ; $a  -le 266; $a++) 
-       {  
-         if($objFolder.getDetailsOf($File, $a)) 
-           { 
-             $hash += @{$($objFolder.getDetailsOf($objFolder.items, $a))  = 
-                   $($objFolder.getDetailsOf($File, $a)) } 
-            $FileMetaData | Add-Member $hash 
-            $hash.clear()  
-           } #end if 
-       } #end for  
-     $a=0 
-     $FileMetaData 
-    } #end foreach $file 
-  } #end foreach $sfolder 
-} #end Get-FileMetaData
-
-Get-FileMetaData -folder "C:\Videos\Horror"
+$mediafile.Tag.Title
+$mediafile.Tag.Year
+$mediafile.Tag.Genres
+$mediafile.Tag.AlbumArtists
+$mediafile.Tag.Comment
+$mediafile.Tag.copyright
