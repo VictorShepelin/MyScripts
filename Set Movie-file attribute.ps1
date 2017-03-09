@@ -1,20 +1,22 @@
 Function SetAttribute ($filePath, $url) {
     $TagLibDll = "F:\Downloads\taglib-sharp.dll" #https://www.nuget.org/packages/taglib/2.1.0
-    $webClient = new-object system.net.WebClient
-    $webpage = $webClient.DownloadData($url)
-    $string = [System.Text.Encoding]::ASCII.GetString($webpage)
-    $output = "$env:TEMP\site.html"
-    if (Test-Path $output) {
-        Remove-Item $output -Force
-        } ##end if test-path
-    $string | Out-File $output
-    $a = 0
-    $title = $null
-    [array]$genres = $null
-    $releaseDate = $null
-    [array]$stars = $null
-    Get-Content $output | ForEach-Object {
-        if ($_ -match "meta property='og:title'") {
+    # getting content from IMDB url
+     $webClient = new-object system.net.WebClient
+     $webpage = $webClient.DownloadData($url)
+     $string = [System.Text.Encoding]::ASCII.GetString($webpage)
+     $output = "$env:TEMP\site.html"
+     if (Test-Path $output) {
+         Remove-Item $output -Force
+         }
+     $string | Out-File $output
+    # parsing web content
+     $a = 0
+     $title = $null
+     [array]$genres = $null
+     $releaseDate = $null
+     [array]$stars = $null
+     Get-Content $output | ForEach-Object {
+         if ($_ -match "meta property='og:title'") { # getting title
             $title = $_
             $chararray = $title.ToCharArray()
             $i = 0
@@ -31,8 +33,8 @@ Function SetAttribute ($filePath, $url) {
                 $i++
             }
             $title = $title.Substring($from,($to-$from))
-        } #end if title
-        if ($_ -match 'class="itemprop" itemprop="genre"') {
+         }
+         if ($_ -match 'class="itemprop" itemprop="genre"') { # getting genre
             $genre = $_
             $genre = $genre -replace "/span></a>"
             $genre = $genre -replace '><span class="itemprop" itemprop="genre"'
@@ -50,16 +52,16 @@ Function SetAttribute ($filePath, $url) {
             }
             $genre  = $genre.Substring($from,($to-$from))
             $genres += $genre
-        } #end if genre
-        if ($_ -match 'See more release dates') {
+         }
+         if ($_ -match 'See more release dates') { # getting release date
             $b = $a
-        } #end if release
-        if (($_ -match 'meta itemprop="datePublished"') -and ($b -eq ($a-1))) {
+         }
+         if (($_ -match 'meta itemprop="datePublished"') -and ($b -eq ($a-1))) { # getting year, right after release date
             $releaseDate = $_
             $releaseDate = $releaseDate -replace '<meta itemprop="datePublished" content="'
             $releaseDate = $releaseDate.Substring(0,4)
-        } #end if date
-        if ($_ -match 'tt_ov_st_sm') {
+         }
+         if ($_ -match 'tt_ov_st_sm') { # getting stars url and their names
             if ($_ -notmatch "fullcredits") {
                 $starUrl = $_
                 $starUrl = $starUrl -replace '"'
@@ -81,37 +83,25 @@ Function SetAttribute ($filePath, $url) {
                     }
                 } #end Get-Content
             } #end if fullcredits
-        } #end if stars
-
-    $a++
-    } #end Get-Content
-    #end of select imdb
-
-$genres | ForEach-Object {
-    [string]$JoinGenres += $_ + ";"
-}
-$stars | ForEach-Object {
-    [string]$AlbumArtists += $_ + ";"
-}
-[System.Reflection.Assembly]::LoadFile($TagLibDll) | Out-Null
-$mediafile = [TagLib.File]::Create("$Folder\$File")
-if (!($mediafile.Writeable)) {
-    Write-Host "file read-only - fix it"
-    Read-Host
-}
-$mediafile.Tag.AlbumArtists = $AlbumArtists # в ролях 13ый таг
-$mediafile.Tag.Year = $releaseDate # год выхода 15ый таг
-$mediafile.Tag.Genres = $JoinGenres # жанр 16ый таг
-$mediafile.Tag.Title = $title # название 21ый таг
-$mediafile.Tag.Comment = "" # коммент 24ый таг
-$mediafile.Tag.copyright = $url # ссылка на imdb 25ый таг
-$mediafile.Save()
-#$mediafile.Tag #all current tags
-$mediafile.Tag.Title
-$mediafile.Tag.Year
-$mediafile.Tag.Genres
-$mediafile.Tag.AlbumArtists
-$mediafile.Tag.Comment
-$mediafile.Tag.copyright
-
+         }
+     $a++
+     }
+    $genres | ForEach-Object {
+        [string]$JoinGenres += $_ + ";"
+     }
+    $stars | ForEach-Object {
+        [string]$AlbumArtists += $_ + ";"
+     }
+    [System.Reflection.Assembly]::LoadFile($TagLibDll) | Out-Null
+    $mediafile = [TagLib.File]::Create("$filePath")
+    if (!($mediafile.Writeable)) {
+        Write-Host "file read-only - fix it"
+        Read-Host
+     }
+    $mediafile.Tag.AlbumArtists = $AlbumArtists # tag 13
+    $mediafile.Tag.Year = $releaseDate # tag 15
+    $mediafile.Tag.Genres = $JoinGenres # tag 16
+    $mediafile.Tag.Title = $title # tag 21
+    $mediafile.Tag.copyright = $url # tag 25
+    $mediafile.Save()
 }
