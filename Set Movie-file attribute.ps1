@@ -1,8 +1,5 @@
-$Folder = "C:\Videos\Horror"
-$File = "Krik.2.1997.DUAL.BDRip.XviD.AC3.-HQCLUB.avi"
-$url = "http://www.imdb.com/title/tt0120082/"
-$TagLibDll = "F:\Downloads\taglib-sharp.dll" #https://www.nuget.org/packages/taglib/2.1.0
-# select imdb
+Function SetAttribute ($filePath, $url) {
+    $TagLibDll = "F:\Downloads\taglib-sharp.dll" #https://www.nuget.org/packages/taglib/2.1.0
     $webClient = new-object system.net.WebClient
     $webpage = $webClient.DownloadData($url)
     $string = [System.Text.Encoding]::ASCII.GetString($webpage)
@@ -116,15 +113,5 @@ $mediafile.Tag.Genres
 $mediafile.Tag.AlbumArtists
 $mediafile.Tag.Comment
 $mediafile.Tag.copyright
-<# без taglib-sharp.dll можно только читать
-    $objShell = New-Object -ComObject Shell.Application 
-    $objFolder = $objShell.NameSpace($Folder)
-    $objFile = $objFolder.ParseName($File)
-    for ($i = 0; $i -le 400; $i++) {
-        if (($objFolder.GetDetailsOf($objFile, $i)) -ne "") {
-        $key = $objFolder.GetDetailsOf($objFile.items, $i)
-        $value = $objFolder.GetDetailsOf($objFile, $i)
-        Write-Host $i "-" $key ":" $value        
-        }
-    }
-    #> #конец чтения
+
+}
