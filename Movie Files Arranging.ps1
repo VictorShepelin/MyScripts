@@ -17,7 +17,6 @@ Function GetExcelData ($filePath) {
     $excel.Workbooks.Close()
     return $data
  }
-
 Function SetAttribute ($filePath, $url) {
     $TagLibDll = "F:\Downloads\taglib-sharp.dll" #https://www.nuget.org/packages/taglib/2.1.0
     # getting content from IMDB url
