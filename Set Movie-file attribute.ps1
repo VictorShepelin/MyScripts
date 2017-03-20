@@ -104,4 +104,26 @@ Function SetAttribute ($filePath, $url) {
     $mediafile.Tag.Title = $title # tag 21
     $mediafile.Tag.copyright = $url # tag 25
     $mediafile.Save()
-}
+ }
+$AlbumArtists = $null
+$releaseDate = $null
+$JoinGenres = $null
+$title = $null
+$url = "http://www.imdb.com/title/tt0411061"
+$filePath = "C:\Videos\tosort\88.minut.2007.x264.BDRip.720p.mkv"
+$filePath = "C:\Videos\Movies\Action Adventure Thriller\The Expendables 3 (2014).avi"
+$mediafile = [TagLib.File]::Create("$filePath")
+$mediafile.GetTag([TagLib.TagTypes]::RiffInfo, $true)
+[TagLib.TagTypes]::RiffInfo
+$mediafile.GetTag("DivX", $true)
+$mediafile.GetTag("RiffInfo", $true)
+$mediafile.GetTag([TagLib.TagTypes]::Id3v1, $true)
+#https://sourcecodebrowser.com/taglib-sharp/2.0.3.0/class_tag_lib_1_1_file.html
+TagLib.File videoFile = TagLib.File.Create("test.mp4");
+TagLib.Mpeg4.AppleTag customTag = (TagLib.Mpeg4.AppleTag)f.GetTag(TagLib.TagTypes.Apple);
+$mediafile.GetTag([TagLib.TagTypes]::Apple, $true).SetDashBox
+$mediafile
+customTag.SetDashBox("Producer","Producer1", "value");
+f.Save();
+f.Dispose();
+#http://stackoverflow.com/questions/18250281/reading-writing-metadata-of-audio-video-files

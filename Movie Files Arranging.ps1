@@ -1,4 +1,5 @@
 $filePath = "D:\OneDrive\Desktop\MoviesDB.xlsx"
+$filePath = "D:\OneDrive\Desktop\movie5.xlsx"
 Function GetExcelData ($filePath) {
     [System.Threading.Thread]::CurrentThread.CurrentCulture = New-Object "System.Globalization.CultureInfo" "en-US"
     $excel = New-Object -ComObject Excel.Application
@@ -105,24 +106,41 @@ Function SetAttribute ($filePath, $url) {
          }
      $a++
      }
-    $genres | ForEach-Object {
+     $genres | ForEach-Object {
         [string]$JoinGenres += $_ + ";"
      }
-    $stars | ForEach-Object {
+     $stars | ForEach-Object {
         [string]$AlbumArtists += $_ + ";"
      }
-    [System.Reflection.Assembly]::LoadFile($TagLibDll) | Out-Null
-    $mediafile = [TagLib.File]::Create("$filePath")
-    if (!($mediafile.Writeable)) {
-        Write-Host "file read-only - fix it"
-        Read-Host
+    # xml tag creation
+     $tagfile = $filePath.Substring(0,$filePath.length-3) + "xml"
+     [xml]$tag = Get-Content "F:\Temp\example.xml"
+     $tag.Tags.Tag.Simple[0].String = $title #TITLE
+     $tag.Tags.Tag.Simple[1].String = $stars #ARTIST
+     $tag.Tags.Tag.Simple[2].String = $releaseDate #DATE_RELEASED
+     $tag.Tags.Tag.Simple[3].String = $url #COPYRIGHT
+     $tag.Tags.Tag.Simple[4].String = $genres #GENRE
+     $tag.Save("$tagfile")
+    if ($filePath.Substring($filePath.length-3,3)-match "avi") {
+        Write-Host "Working with avi"
+        [System.Reflection.Assembly]::LoadFile($TagLibDll) | Out-Null
+        $mediafile = [TagLib.File]::Create("$filePath")
+        if (!($mediafile.Writeable)) {
+            Write-Host "file read-only - fix it"
+            Read-Host
+        }
+        $mediafile.Tag.AlbumArtists = $AlbumArtists # tag 13
+        $mediafile.Tag.Year = $releaseDate # tag 15
+        $mediafile.Tag.Genres = $JoinGenres # tag 16
+        $mediafile.Tag.Title = $title # tag 21
+        $mediafile.Tag.copyright = $url # tag 25
+        $mediafile.Save()       
      }
-    $mediafile.Tag.AlbumArtists = $AlbumArtists # tag 13
-    $mediafile.Tag.Year = $releaseDate # tag 15
-    $mediafile.Tag.Genres = $JoinGenres # tag 16
-    $mediafile.Tag.Title = $title # tag 21
-    $mediafile.Tag.copyright = $url # tag 25
-    $mediafile.Save()
+    if ($filePath.Substring($filePath.length-3,3)-match "mkv") {
+        Write-Host "Working with mkv"
+        $output = $filePath + "_fixed.mkv"
+        & "C:\Program Files\mkvtoolnix\mkvmerge.exe" --output $output --global-tags $tagfile --title $title $filePath
+     }
  }
 $ExcelData = GetExcelData -filePath $filePath
 $ExcelData.GetEnumerator() | ForEach-Object {
