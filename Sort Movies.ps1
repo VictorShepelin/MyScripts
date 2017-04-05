@@ -1,68 +1,99 @@
-$filePath = "D:\OneDrive\Desktop\MoviesDB.xlsx"
-$TagLibDll = "F:\Downloads\taglib-sharp.dll" #https://www.nuget.org/packages/taglib/2.1.0
+$TagLibDll = "D:\OneDrive\Tools\Multimedia\taglib-sharp.dll" #https://www.nuget.org/packages/taglib/2.1.0
 [System.Reflection.Assembly]::LoadFile($TagLibDll) | Out-Null
-Function GetExcelData ($filePath) {
-    [System.Threading.Thread]::CurrentThread.CurrentCulture = New-Object "System.Globalization.CultureInfo" "en-US"
-    $excel = New-Object -ComObject Excel.Application
-    $excel.Visible = $false
-    $workbook = $excel.Workbooks.Open("$filePath")
-    $sheet = $workbook.Worksheets.Item(1)
-    $data = @{}
-    $intRow = 2
-    Do {
-        $moviePath = $sheet.Cells.Item($intRow, 1).Value()
-        $url = $sheet.Cells.Item($intRow, 2).Value()
-        $data.Add($moviePath,$url)
-        $intRow++
-     }
-     While ($sheet.Cells.Item($intRow,1).Value() -ne $null)
-    $excel.Workbooks.Close()
-    return $data
- }
-$ExcelData = GetExcelData -filePath $filePath
-$ExcelData.GetEnumerator() | ForEach-Object {
-    $movie = $_.key
-    $movieFile = $_.key # таг либ требует в явном виде и без лайфхака
-    $movie = $movie -replace '\[','`[' -replace '\]','`]' # вынужденый лайфхак из-за скобок
-    if (Test-Path $movie) {
-        $ext = $null
-        $ext = Get-ChildItem -Path $_.key | Select-Object -ExpandProperty Extension
-        $ext
-        if ($ext -eq $null) {
-            $chararray = $movie.ToCharArray()
-            $i = 0
-            $dot = $null
+$files = Get-ChildItem -Path "C:\Videos\Movies" -Filter "*.mkv"
+$files | ForEach-Object {
+    $movieFile = $_.FullName
+    # читаю таги из матроски
+    $out = & "C:\Program Files\mkvtoolnix\mkvinfo.exe" $movieFile -t
+    $i = 0
+    $out| ForEach-Object {
+        $i++
+        if ($_ -match "Name: TITLE") {
+            $string = $out[$i]
+            $chararray = $string.ToCharArray()
+            $j = 0
+            $from = $null
             $chararray | ForEach-Object {
-                if ($_ -eq ".") {
-                    $dot = $i
+                if ($_ -match ':'){
+                    if ($from -eq $null) {
+                        $from = $j+2
+                    }
                 }
-                $i++
+                $j++
             }
-            $ext = $movie.Substring($dot,($chararray.count-$dot))
+            $title = $string.Substring($from,(($chararray.count)-$from))
+            $title
         }
-        try {
-            $mediafile = [TagLib.File]::Create("$movieFile")
+        if ($_ -match "Name: ARTIST") {
+            $string = $out[$i]
+            $chararray = $string.ToCharArray()
+            $j = 0
+            $from = $null
+            $chararray | ForEach-Object {
+                if ($_ -match ':'){
+                    if ($from -eq $null) {
+                        $from = $j+2
+                    }
+                }
+                $j++
+            }
+            $AlbumArtists = $string.Substring($from,(($chararray.count)-$from))
+            $AlbumArtists
         }
-        catch {
-            Write-Host "Error"
+        if ($_ -match "Name: DATE_RELEASED") {
+            $string = $out[$i]
+            $chararray = $string.ToCharArray()
+            $j = 0
+            $from = $null
+            $chararray | ForEach-Object {
+                if ($_ -match ':'){
+                    if ($from -eq $null) {
+                        $from = $j+2
+                    }
+                }
+                $j++
+            }
+            $releaseDate = $string.Substring($from,(($chararray.count)-$from))
+            $releaseDate
         }
-        if ($mediafile.Tag.Genres) {
-            $genrePath = $mediafile.Tag.Genres
-            $chararray = $genrePath.ToCharArray().count
-            $genrePath = $genrePath.Substring(0,($chararray-1))
-            $genrePath = $genrePath -replace ";"," "
-            $path = "C:\Videos\Movies\" + $genrePath
-            $newFilePath = "$path\" + $mediafile.Tag.Title + $ext
-            Write-Host "$movie будет переименован в $newFilePath"
-            New-Item -Path $path -ItemType Directory -ErrorAction SilentlyContinue | Out-Null
-            Move-Item -Path $movie -Destination $newFilePath
+        if ($_ -match "Name: COPYRIGHT") {
+            $string = $out[$i]
+            $chararray = $string.ToCharArray()
+            $j = 0
+            $from = $null
+            $chararray | ForEach-Object {
+                if ($_ -match ':'){
+                    if ($from -eq $null) {
+                        $from = $j+2
+                    }
+                }
+                $j++
+            }
+            $url = $string.Substring($from,(($chararray.count)-$from))
+            $url
         }
-        else {
-            $newFilePath = $null
+        if ($_ -match "Name: GENRE") {
+            $string = $out[$i]
+            $chararray = $string.ToCharArray()
+            $j = 0
+            $from = $null
+            $chararray | ForEach-Object {
+                if ($_ -match ':'){
+                    if ($from -eq $null) {
+                        $from = $j+2
+                    }
+                }
+                $j++
+            }
+            $JoinGenres = $string.Substring($from,(($chararray.count)-$from))
+            $JoinGenres
+            $JoinGenres = $JoinGenres.Substring(0,($JoinGenres.ToCharArray().count-1)) -replace ";", " "
         }
     }
+    if (Test-Path "C:\Videos\Movies\$JoinGenres") {
+        }
     else {
-        $movie
-        Test-Path $movie        
-    }
- }
+        New-Item -Path "C:\Videos\Movies\$JoinGenres" -ItemType Directory
+        }
+    Move-Item -Path $movieFile -Destination "C:\Videos\Movies\$JoinGenres"
+}

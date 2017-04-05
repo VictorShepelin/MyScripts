@@ -1,5 +1,4 @@
 $filePath = "D:\OneDrive\Desktop\MoviesDB.xlsx"
-$filePath = "D:\OneDrive\Desktop\movie5.xlsx"
 Function GetExcelData ($filePath) {
     [System.Threading.Thread]::CurrentThread.CurrentCulture = New-Object "System.Globalization.CultureInfo" "en-US"
     $excel = New-Object -ComObject Excel.Application
@@ -19,7 +18,8 @@ Function GetExcelData ($filePath) {
     return $data
  }
 Function SetAttribute ($filePath, $url) {
-    $TagLibDll = "F:\Downloads\taglib-sharp.dll" #https://www.nuget.org/packages/taglib/2.1.0
+    Write-Host "working with $filePath"
+    $TagLibDll = "D:\OneDrive\Tools\Multimedia\taglib-sharp.dll" #https://www.nuget.org/packages/taglib/2.1.0
     # getting content from IMDB url
      $webClient = new-object system.net.WebClient
      $webpage = $webClient.DownloadData($url)
@@ -53,6 +53,8 @@ Function SetAttribute ($filePath, $url) {
                 $i++
             }
             $title = $title.Substring($from,($to-$from))
+            $title = $title -replace ":"," -"
+            $title = $title -replace "&quot;"
          }
          if ($_ -match 'class="itemprop" itemprop="genre"') { # getting genre
             $genre = $_
@@ -116,11 +118,12 @@ Function SetAttribute ($filePath, $url) {
      $tagfile = $filePath.Substring(0,$filePath.length-3) + "xml"
      [xml]$tag = Get-Content "F:\Temp\example.xml"
      $tag.Tags.Tag.Simple[0].String = $title #TITLE
-     $tag.Tags.Tag.Simple[1].String = $stars #ARTIST
+     $tag.Tags.Tag.Simple[1].String = $AlbumArtists #ARTIST
      $tag.Tags.Tag.Simple[2].String = $releaseDate #DATE_RELEASED
      $tag.Tags.Tag.Simple[3].String = $url #COPYRIGHT
-     $tag.Tags.Tag.Simple[4].String = $genres #GENRE
+     $tag.Tags.Tag.Simple[4].String = $JoinGenres #GENRE
      $tag.Save("$tagfile")
+     Write-Host $title $AlbumArtists $releaseDate $JoinGenres $url -ForegroundColor Green
     if ($filePath.Substring($filePath.length-3,3)-match "avi") {
         Write-Host "Working with avi"
         [System.Reflection.Assembly]::LoadFile($TagLibDll) | Out-Null
@@ -138,8 +141,10 @@ Function SetAttribute ($filePath, $url) {
      }
     if ($filePath.Substring($filePath.length-3,3)-match "mkv") {
         Write-Host "Working with mkv"
-        $output = $filePath + "_fixed.mkv"
+        $output = "C:\Videos\Movies\$title.mkv"
         & "C:\Program Files\mkvtoolnix\mkvmerge.exe" --output $output --global-tags $tagfile --title $title $filePath
+        Remove-Item $filePath -Force
+        Remove-Item $tagfile
      }
  }
 $ExcelData = GetExcelData -filePath $filePath
