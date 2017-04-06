@@ -3,8 +3,12 @@ $TagLibDll = "D:\OneDrive\Tools\Multimedia\taglib-sharp.dll" #https://www.nuget.
 $files = Get-ChildItem -Path "C:\Videos\Movies" -Filter "*.mkv"
 $files | ForEach-Object {
     $movieFile = $_.FullName
+    $movieFile
+    $starttime = Get-Date
     # читаю таги из матроски
     $out = & "C:\Program Files\mkvtoolnix\mkvinfo.exe" $movieFile -t
+    $endtime = Get-Date
+    ($endtime-$starttime)
     $i = 0
     $out| ForEach-Object {
         $i++
@@ -96,4 +100,6 @@ $files | ForEach-Object {
         New-Item -Path "C:\Videos\Movies\$JoinGenres" -ItemType Directory
         }
     Move-Item -Path $movieFile -Destination "C:\Videos\Movies\$JoinGenres"
+    $finishtime = Get-Date
+    $finishtime-$starttime
 }
