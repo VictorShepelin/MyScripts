@@ -1,8 +1,8 @@
 ﻿#region Переменные
- $hyperVHost = "pc10228"
+ $hyperVHost = "."
  $vmName = "testtesla003"
  #$imageSource = "\\vs1026\deploymentshare$\Operating Systems\7 x64\sources\install.wim"
- $imageSource = "\\vs1026\deploymentshare$\Operating Systems\7 x86\sources\install.wim"
+ $imageSource = "\deploymentshare$\Operating Systems\7 x86\sources\install.wim"
  $imagePath = "C:\Hyper-V"
  $image = "$imagePath\install.wim"
  $vhdx = "$imagePath\Virtual Hard Disks\$vmName.vhdx"
@@ -15,8 +15,8 @@
  $appsPath = "C:\Hyper-V\TeslaApps\apps"
  $vmguestiso = "C:\Hyper-V\vmguest.iso"
  $psexecPath = "C:\Hyper-V\PsExec.exe" # обязательно проверьте запуск и согласитесь с EULA
- $password = "Answer42"
- . "\\vnxfs\powershell\Shepelin\C\Convert-WindowsImage.ps1"
+ $password = "."
+ . "\\powershell\Shepelin\C\Convert-WindowsImage.ps1"
  $pw = convertto-securestring -AsPlainText -Force -String $password
  $cred = New-Object -TypeName System.Management.Automation.PSCredential -argumentlist "administrator", $pw
  #endregion
@@ -303,7 +303,7 @@ Checkpoint-VM -Name $vmName -SnapshotName "First Start" # создаём checkpo
  CheckVM -hyperVHost $hyperVHost -vmName $vmName -time $time
  Invoke-Command -ComputerName $computer -Credential $cred -ScriptBlock {
     $regPath = 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon'
-    $password = "Answer42"
+    $password = "."
     New-ItemProperty -Path $regPath -PropertyType String -Name "DefaultPassword" -Value $password -Force
     Set-ItemProperty -Path $regPath -Name "AutoAdminLogon" -Value "1"
     Set-ItemProperty -Path $regPath -Name "DefaultUsername" -Value "Administrator"
